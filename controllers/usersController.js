@@ -25,8 +25,30 @@ const getUser = async (req, res) => {
     res.json(user);
 }
 
+const updateUser = async (req, res) => {
+
+    console.log(req?.body.user)    
+ 
+    if (!req?.body?.user?._id) {
+        return res.status(400).json({ 'message': 'ID parameter is required.' });
+    }
+
+    User.updateOne({ _id : req.body.user._id }, 
+        {"$set" : req.body.user }, function (err, docs) {
+            if (err){
+                console.log(err)
+            }   
+            else{
+                console.log("Updated Docs : ", docs);
+                res.json(docs);
+            }
+    });
+
+}
+
 module.exports = {
     getAllUsers,
+    updateUser,
     deleteUser,
     getUser
 }
