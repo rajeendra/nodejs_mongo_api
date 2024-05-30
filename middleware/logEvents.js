@@ -26,4 +26,16 @@ const logger = (req, res, next) => {
     next();
 }
 
-module.exports = { logger, logEvents };
+const middlewareFirst = (req, res, next) => {
+    //logEvents(`${req.method}\t${req.headers.origin}\t${req.url}`, 'reqLog.txt');
+    console.log(` Middleware first event done. `);
+    next();
+}
+
+const middlewareSecond = (req, res, next) => {
+    //logEvents(`${req.method}\t${req.headers.origin}\t${req.url}`, 'reqLog.txt');
+    console.log(` Middleware second event done. `);
+    next();
+}
+
+module.exports = { logger, logEvents, middlewareFirst, middlewareSecond };

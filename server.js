@@ -10,20 +10,25 @@ const mongoose = require('mongoose');
 const corsOptions = require('./config/corsOptions');
 const connectDB = require('./config/dbConn');
 
-const { logger } = require('./middleware/logEvents');
+const {
+  logger,
+  middlewareFirst,
+  middlewareSecond,
+} = require("./middleware/logEvents");
 const errorHandler = require('./middleware/errorHandler');
 const credentials = require('./middleware/credentials');
 const verifyJWT = require('./middleware/verifyJWT');
 
 const PORT = process.env.PORT || 3500;
-
-// Connect to MongoDB
+    
+// Connect to Mo ngoDB
 connectDB();
 
 // Middleware stack
 
 // 1. custom middleware logger
-app.use(logger);
+// This middleware function with no mount path. The function is executed every time the app receives a request.
+app.use(logger); // const logger = (req, res, next) => { .. next() }
 
 // 2. Handle options credentials check - before CORS!
 // and fetch cookies credentials requirement
@@ -42,6 +47,8 @@ app.use(express.json());
 app.use(cookieParser());
 
 // 7. serve static files
+// This middleware function mounted on the / path. ..
+// .. The function is executed for any type of HTTP request on the / path
 app.use('/', express.static(path.join(__dirname, '/public')));
 
 // 8. routes
@@ -63,10 +70,13 @@ app.use('/refresh', require('./routes/refresh'));
 app.use('/logout', require('./routes/logout'));
 
 app.use(verifyJWT);
+app.use(middlewareFirst);
 app.use('/employees', require('./routes/api/employees'));
 app.use('/users', require('./routes/api/users'));
 app.use('/contacts', require('./routes/api/contacts'));
+app.use(middlewareSecond);
 
+// here all mean app.get(), app.post(), .. etc
 app.all('*', (req, res) => {
     res.status(404);
     if (req.accepts('html')) {
@@ -84,4 +94,4 @@ app.use(errorHandler);
 mongoose.connection.once('open', () => {
     console.log('Connected to MongoDB ');
     app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
-})
+});
